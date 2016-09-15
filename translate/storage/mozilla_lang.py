@@ -37,6 +37,8 @@ class LangUnit(base.TranslationUnit):
 
     def __init__(self, source=None):
         self.locations = []
+        self.eol = "\n"
+        self.rawtarget = None
         base.TranslationUnit.__init__(self, source)
 
     def __str__(self):
@@ -49,14 +51,15 @@ class LangUnit(base.TranslationUnit):
         else:
             target = self.target
         if self.getnotes():
-            notes = ('\n').join(
+            notes = (self.eol).join(
                 [("#%s" % note
                   if note.startswith("#")
                   else "# %s" % note)
                  for note
                  in self.getnotes('developer').split("\n")])
-            return u"%s\n;%s\n%s%s" % (notes, self.source, target, unchanged)
-        return u";%s\n%s%s" % (self.source, target, unchanged)
+            return u"%s%s;%s%s%s%s" % (
+                notes, self.eol, self.source, self.eol, target, unchanged)
+        return u";%s%s%s%s" % (self.source, self.eol, target, unchanged)
 
     def getlocations(self):
         return self.locations
@@ -77,15 +80,18 @@ class LangStore(txt.TxtFile):
         self.is_active = False
         self.mark_active = mark_active
         self._headers = []
+        self.eol = "\n"
         super(LangStore, self).__init__(inputfile, **kwargs)
 
     def parse(self, lines):
         source_unit = None
         comment = ""
         if not isinstance(lines, list):
-            lines = lines.split(b"\n")
+            lines = lines.split("\n")
 
         for lineoffset, line in enumerate(lines):
+            if line.endswith("\r"):
+                self.eol = "\r\n"
             line = line.decode(self.encoding).rstrip("\n").rstrip("\r")
 
             if lineoffset == 0 and line == "## active ##":
@@ -121,6 +127,7 @@ class LangStore(txt.TxtFile):
 
             if line.startswith(';'):
                 source_unit = self.addsourceunit(line[1:])
+                source_unit.eol = self.eol
                 source_unit.addlocation(
                     "%s:%d" % (self.filename, lineoffset + 1))
                 if comment is not None:
@@ -129,14 +136,16 @@ class LangStore(txt.TxtFile):
 
     def serialize(self, out):
         if self.is_active or self.mark_active:
-            out.write(b"## active ##\n")
+            out.write(b"## active ##")
+            out.write(self.eol)
         for header in self._headers:
-            out.write(six.text_type("%s\n" % header).encode('utf-8'))
+            out.write(six.text_type(header).encode('utf-8'))
+            out.write(self.eol)
         if self._headers:
-            out.write(b"\n\n")
+            out.write(self.eol * 2)
         for unit in self.units:
             out.write(six.text_type(unit).encode('utf-8'))
-            out.write(b"\n\n\n")
+            out.write(self.eol * 3)
 
     def getlangheaders(self):
         return self._headers
