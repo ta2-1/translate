@@ -102,7 +102,10 @@ class LangStore(txt.TxtFile):
                 self._headers.append(line)
                 continue
 
-            if len(line) == 0 and not source_unit:  # Skip blank lines
+            if len(line) == 0 and not source_unit:
+                if len(self.units) == 0:
+                    self._headers.append(line)  # Append blank lines to header
+                # else skip blank lines
                 continue
 
             if source_unit:
@@ -141,8 +144,6 @@ class LangStore(txt.TxtFile):
         for header in self._headers:
             out.write(six.text_type(header).encode('utf-8'))
             out.write(self.eol)
-        if self._headers:
-            out.write(self.eol * 2)
         for unit in self.units:
             out.write(six.text_type(unit).encode('utf-8'))
             out.write(self.eol * 3)
