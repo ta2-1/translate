@@ -215,7 +215,7 @@ class TestMozLangFile(test_base.TestTranslationStore):
                       "\n\n")
         lang = lang_header + '\n' * nl + lang_unit1
         store = self.StoreClass.parsestring(lang)
-        assert str(store) == lang
+        assert bytes(store).decode('utf-8') == lang
 
     def test_tag_comments(self):
         """Ensure we can handle comments and distinguish from headers"""

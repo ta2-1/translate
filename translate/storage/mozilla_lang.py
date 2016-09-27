@@ -95,10 +95,10 @@ class LangStore(txt.TxtFile):
         source_unit = None
         comment = ""
         if not isinstance(lines, list):
-            lines = lines.split("\n")
+            lines = lines.split(b"\n")
 
         for lineoffset, line in enumerate(lines):
-            if line.endswith("\r"):
+            if line.endswith(b"\r"):
                 self.eol = "\r\n"
             line = line.decode(self.encoding).rstrip("\n").rstrip("\r")
 
@@ -144,15 +144,16 @@ class LangStore(txt.TxtFile):
                     comment = ""
 
     def serialize(self, out):
+        eol = self.eol.encode('utf-8')
         if self.is_active or self.mark_active:
             out.write(b"## active ##")
-            out.write(self.eol)
+            out.write(eol)
         for header in self._headers:
             out.write(six.text_type(header).encode('utf-8'))
-            out.write(self.eol)
+            out.write(eol)
         for unit in self.units:
             out.write(six.text_type(unit).encode('utf-8'))
-            out.write(self.eol * 3)
+            out.write(eol * 3)
 
     def getlangheaders(self):
         return self._headers
