@@ -98,7 +98,7 @@ class LangStore(txt.TxtFile):
             lines = lines.split("\n")
 
         for lineoffset, line in enumerate(lines):
-            if line.endswith(b"\r"):
+            if line.endswith("\r"):
                 self.eol = "\r\n"
             line = line.decode(self.encoding).rstrip("\n").rstrip("\r")
 
