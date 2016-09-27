@@ -44,7 +44,7 @@ class LangUnit(base.TranslationUnit):
 
     def __init__(self, source=None):
         self.locations = []
-        self.eol = b"\n"
+        self.eol = "\n"
         self.rawtarget = None
         base.TranslationUnit.__init__(self, source)
 
@@ -99,7 +99,7 @@ class LangStore(txt.TxtFile):
 
         for lineoffset, line in enumerate(lines):
             if line.endswith(b"\r"):
-                self.eol = b"\r\n"
+                self.eol = "\r\n"
             line = line.decode(self.encoding).rstrip("\n").rstrip("\r")
 
             if lineoffset == 0 and line == "## active ##":
